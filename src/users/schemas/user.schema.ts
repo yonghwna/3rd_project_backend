@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { HydratedDocument } from 'mongoose';
 
@@ -7,16 +8,31 @@ const options = { timestamps: true };
 
 @Schema(options)
 export class User {
+  @ApiProperty({
+    example: 'example@gmail.com',
+    description: 'email',
+    required: true,
+  })
   @Prop({ required: true, unique: true })
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
+  @ApiProperty({
+    example: 'exampleName1',
+    description: 'nickname',
+    required: true,
+  })
   @Prop({ required: true, unique: true })
   @IsString()
   @IsNotEmpty()
   nickname: string;
 
+  @ApiProperty({
+    example: 'ExamplePassword1',
+    description: 'password',
+    required: true,
+  })
   @Prop({ required: true })
   @IsString()
   @IsNotEmpty()
