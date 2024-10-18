@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-import { HydratedDocument } from 'mongoose';
+import { Document, SchemaOptions } from 'mongoose';
 
-export type Document = HydratedDocument<User>;
-const options = { timestamps: true };
-
+const options: SchemaOptions = {
+  timestamps: true,
+};
 @Schema(options)
-export class User {
+export class User extends Document {
   @ApiProperty({
     example: 'example@gmail.com',
     description: 'email',
@@ -45,15 +45,15 @@ export class User {
   readonly readOnlyData: {
     id: string;
     email: string;
-    name: string;
+    nickname: string;
   };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.virtual('readOnlyData').get(function () {
+UserSchema.virtual('readOnlyData').get(function (this: User) {
   return {
-    _id: this._id,
+    id: this.id,
     email: this.email,
     nickname: this.nickname,
   };

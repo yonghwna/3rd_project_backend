@@ -16,4 +16,12 @@ export class UsersRepository {
     createdUser.save();
     return createdUser;
   }
+  async findUserByEmail(email: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ email });
+    return user;
+  }
+  async findUserByWithoutPassword(userId: string): Promise<User | null> {
+    const user = await this.userModel.findById(userId).select('-password');
+    return user;
+  }
 }
