@@ -6,10 +6,16 @@ import {
 import { UserRequestDto } from './dto/users.request.dto';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from './repository/users.repository';
+import { User } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly userRepository: UsersRepository) {}
+  async getAllUser() {
+    const allUser = await this.userRepository.getAllUser();
+    const readOnlyData = allUser.map((user) => user.readOnlyData);
+    return readOnlyData;
+  }
 
   async signUp(body: UserRequestDto) {
     const { email, password } = body;
@@ -24,5 +30,15 @@ export class UsersService {
       password: hashedPassword,
     });
     return createdUser.readOnlyData;
+  }
+
+  async uploadImage(user: User, file: Express.Multer.File) {
+    const fileName = `users/${file.filename}`;
+    console.log(fileName);
+    const newUser = await this.userRepository.findByIdAndUpdateImg(
+      user.id,
+      fileName,
+    );
+    return newUser;
   }
 }

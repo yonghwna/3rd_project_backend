@@ -38,7 +38,10 @@ export class User extends Document {
   @IsNotEmpty()
   password: string;
 
-  @Prop()
+  @Prop({
+    default:
+      'https://img1.daumcdn.net/thumb/R1280x0/?fname=http://t1.daumcdn.net/brunch/service/user/7r5X/image/9djEiPBPMLu_IvCYyvRPwmZkM1g.jpg',
+  })
   @IsString()
   profileImage: string;
 
@@ -46,6 +49,7 @@ export class User extends Document {
     id: string;
     email: string;
     nickname: string;
+    profileImage: string;
   };
 }
 
@@ -56,6 +60,7 @@ UserSchema.virtual('readOnlyData').get(function (this: User) {
     id: this.id,
     email: this.email,
     nickname: this.nickname,
+    profileImage: this.profileImage,
   };
 });
 //이건 가상필드인데, db에 저장되지 않는다. 가입을 할 때 createdUser를 리턴하면 비밀번호도 보여버리니까,

@@ -27,6 +27,7 @@ import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/utils/multer.options';
+import { User } from './schemas/user.schema';
 
 @Controller('users')
 @UseInterceptors(SuccessInterceptor)
@@ -67,7 +68,17 @@ export class UsersController {
   @ApiOperation({ summary: '프로필  이미지 업로드' })
   @Post('upload')
   @UseInterceptors(FileInterceptor('image', multerOptions('users')))
-  uploadUsers(@UploadedFile() image: Express.Multer.File) {
-    console.log(image);
+  @UseGuards(JwtAuthGuard)
+  uploadUsers(
+    @UploadedFile() image: Express.Multer.File,
+    @CurrentUser() user: User,
+  ) {
+    return this.usersService.uploadImage(user, image);
+  }
+
+  @ApiOperation({ summary: '모든유저' })
+  @Get('all')
+  async findAll() {
+    return await this.usersService.getAllUser();
   }
 }

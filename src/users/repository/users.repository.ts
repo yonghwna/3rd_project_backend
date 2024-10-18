@@ -7,6 +7,15 @@ import { UserRequestDto } from '../dto/users.request.dto';
 @Injectable()
 export class UsersRepository {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  async getAllUser() {
+    return await this.userModel.find();
+  }
+  async findByIdAndUpdateImg(id: string, fileName: string) {
+    const user = await this.userModel.findById(id);
+    user.profileImage = `http://localhost:8000/media/${fileName}`;
+    const newUser = await user.save();
+    return newUser.readOnlyData;
+  }
   async existsByEmail(email: string): Promise<boolean> {
     const result = await this.userModel.exists({ email });
     return result ? true : false;
