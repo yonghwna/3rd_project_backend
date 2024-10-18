@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Post,
   Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -24,6 +25,8 @@ import { AuthService } from 'src/auth/auth.service';
 import { LoginRequestDto } from 'src/auth/dto/login.request.dto';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/common/utils/multer.options';
 
 @Controller('users')
 @UseInterceptors(SuccessInterceptor)
@@ -55,14 +58,16 @@ export class UsersController {
     return await this.usersService.signUp(body);
   }
 
+  @ApiOperation({ summary: '로그인' })
   @Post('login')
   logIn(@Body() data: LoginRequestDto) {
     return this.authService.jwtLogIn(data);
   }
 
-  @Post('logout')
-  logOut() {}
-
+  @ApiOperation({ summary: '프로필  이미지 업로드' })
   @Post('upload')
-  uploadUsers() {}
+  @UseInterceptors(FileInterceptor('image', multerOptions('users')))
+  uploadUsers(@UploadedFile() image: Express.Multer.File) {
+    console.log(image);
+  }
 }
