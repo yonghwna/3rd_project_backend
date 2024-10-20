@@ -11,7 +11,9 @@ import { MulterModule } from '@nestjs/platform-express';
   imports: [
     MulterModule.register({
       dest: './upload',
+      //dest: './upload'는 프로젝트 루트에 upload라는 폴더를 만들어서 파일을 저장한다는 뜻입니다.
     }),
+
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     forwardRef(() => AuthModule),
   ],

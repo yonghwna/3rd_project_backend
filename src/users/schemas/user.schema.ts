@@ -39,6 +39,7 @@ export class User extends Document {
   password: string;
 
   @Prop({
+    //회원가입 시 기본이미지 지정.
     default:
       'https://img1.daumcdn.net/thumb/R1280x0/?fname=http://t1.daumcdn.net/brunch/service/user/7r5X/image/9djEiPBPMLu_IvCYyvRPwmZkM1g.jpg',
   })

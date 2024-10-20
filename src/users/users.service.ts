@@ -32,9 +32,8 @@ export class UsersService {
     return createdUser.readOnlyData;
   }
 
-  async uploadImage(user: User, file: Express.Multer.File) {
-    const fileName = `users/${file.filename}`;
-    console.log(fileName);
+  async uploadImage(user: User, image: Express.Multer.File) {
+    const fileName = `users/${image.filename}`;
     const newUser = await this.userRepository.findByIdAndUpdateImg(
       user.id,
       fileName,

@@ -1,22 +1,14 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  HttpException,
-  HttpStatus,
-  Param,
-  ParseIntPipe,
   Post,
-  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { HttpExceptionFilter } from 'src/common/exceptions/http-exception.filter';
-import { PositiveIntPipe } from 'src/pipes/positiveint.pipe';
-import { NotFloatPipe } from 'src/pipes/NotFloat.pipe';
+
 import { SuccessInterceptor } from 'src/common/interceptors/success.interceptor';
 import { UserRequestDto } from './dto/users.request.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -54,25 +46,28 @@ export class UsersController {
     type: ReadOnlyUserDto,
   })
   @ApiOperation({ summary: '회원가입' })
-  @Post()
+  @Post('signup')
   async signUp(@Body() body: UserRequestDto) {
     return await this.usersService.signUp(body);
   }
 
   @ApiOperation({ summary: '로그인' })
-  @Post('login')
+  @Post('signin')
   logIn(@Body() data: LoginRequestDto) {
-    return this.authService.jwtLogIn(data);
+    return this.authService.signIn(data);
   }
 
   @ApiOperation({ summary: '프로필  이미지 업로드' })
   @Post('upload')
   @UseInterceptors(FileInterceptor('image', multerOptions('users')))
+  //users라는 폴더에 이미지 저장
   @UseGuards(JwtAuthGuard)
+  //유저정보 가져오기
   uploadUsers(
     @UploadedFile() image: Express.Multer.File,
     @CurrentUser() user: User,
   ) {
+    //로그인한 유저 정보와 이미지를 전달.
     return this.usersService.uploadImage(user, image);
   }
 
