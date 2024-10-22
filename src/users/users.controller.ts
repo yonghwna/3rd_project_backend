@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  Patch,
   Post,
   UploadedFile,
   UseGuards,
@@ -31,9 +34,23 @@ export class UsersController {
 
   @ApiOperation({ summary: '현재 로그인한 유저 정보' })
   @UseGuards(JwtAuthGuard)
-  @Get()
+  @Get('me')
   getCurrentUser(@CurrentUser() user) {
     return user.readOnlyData;
+  }
+
+  @ApiOperation({ summary: 'id로 유저정보 가져오기' })
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    return await this.usersService.getUserById(id);
+  }
+
+  @ApiOperation({ summary: '로그인한 유저 정보 수정' })
+  @UseGuards(JwtAuthGuard)
+  @Patch()
+  async updateUserById(@CurrentUser() user, @Body() body) {
+    return await this.usersService.updateUserById(user, body);
   }
 
   @ApiResponse({
@@ -71,9 +88,10 @@ export class UsersController {
     return this.usersService.uploadImage(user, image);
   }
 
-  @ApiOperation({ summary: '모든유저' })
-  @Get('all')
-  async findAll() {
-    return await this.usersService.getAllUser();
+  @ApiOperation({ summary: '로그인한 유저 계정 삭제' })
+  @UseGuards(JwtAuthGuard)
+  @Delete()
+  deleteUserById(@CurrentUser() user) {
+    this.usersService.deleteUserById(user);
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '../schemas/user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserRequestDto } from '../dto/users.request.dto';
 
@@ -25,12 +25,31 @@ export class UsersRepository {
     createdUser.save();
     return createdUser;
   }
+
+  async findById(userId: string): Promise<User | null> {
+    const user = await this.userModel.findById(userId);
+    return user;
+  }
+
   async findUserByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({ email });
     return user;
   }
-  async findUserByIdWithoutPassword(userId: string): Promise<User | null> {
+
+  async findByIdAndUpdateNickname(userId: string, nickname: string) {
+    const user = await this.userModel.findById(userId);
+    user.nickname = nickname;
+    const newUser = await user.save();
+    return newUser.readOnlyData;
+  }
+  async findUserByIdWithoutPassword(
+    userId: string | Types.ObjectId,
+    //string인 경우에는...아니 이거 어디서 썻었지
+  ): Promise<User | null> {
     const user = await this.userModel.findById(userId).select('-password');
     return user;
+  }
+  async deleteUserById(userId: string) {
+    return await this.userModel.findByIdAndDelete(userId);
   }
 }

@@ -32,6 +32,24 @@ export class UsersService {
     return createdUser.readOnlyData;
   }
 
+  async getUserById(userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new HttpException('유저가 존재하지 않습니다', 404);
+    }
+    return user.readOnlyData;
+  }
+
+  async updateUserById(user: User, body: { nickname: string }) {
+    console.log({ user: user.id, body });
+    const { nickname } = body;
+    const newUser = await this.userRepository.findByIdAndUpdateNickname(
+      user.id,
+      nickname,
+    );
+    return newUser;
+  }
+
   async uploadImage(user: User, image: Express.Multer.File) {
     const fileName = `users/${image.filename}`;
     const newUser = await this.userRepository.findByIdAndUpdateImg(
@@ -39,5 +57,12 @@ export class UsersService {
       fileName,
     );
     return newUser;
+  }
+
+  async deleteUserById(user: User) {
+    const deletedUser = await this.userRepository.deleteUserById(user.id);
+    if (!deletedUser) {
+      throw new HttpException('유저가 존재하지 않습니다', 404);
+    }
   }
 }

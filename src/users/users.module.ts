@@ -6,6 +6,7 @@ import { User, UserSchema } from './schemas/user.schema';
 import { UsersRepository } from './repository/users.repository';
 import { AuthModule } from 'src/auth/auth.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { CommentsModule } from 'src/comments/comments.module';
 
 @Module({
   imports: [

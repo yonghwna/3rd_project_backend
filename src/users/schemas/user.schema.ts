@@ -4,6 +4,7 @@ import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { Document, SchemaOptions } from 'mongoose';
 
 const options: SchemaOptions = {
+  collection: 'users',
   timestamps: true,
 };
 @Schema(options)
