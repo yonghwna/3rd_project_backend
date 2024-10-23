@@ -21,6 +21,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule,
     AuthModule,
     CommentsModule,
+
     forwardRef(() => CommentsModule),
     MongooseModule.forFeature([
       { name: Post.name, schema: PostSchema },
@@ -32,6 +33,6 @@ import { ConfigModule } from '@nestjs/config';
   ],
   controllers: [PostsController],
   providers: [PostsService, PostsRepository, AwsService],
-  exports: [PostsService, PostsRepository],
+  exports: [PostsService, PostsRepository, AwsService],
 })
 export class PostsModule {}

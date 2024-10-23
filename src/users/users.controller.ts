@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -23,6 +24,7 @@ import { CurrentUser } from 'src/common/decorators/user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/utils/multer.options';
 import { User } from './schemas/user.schema';
+import { memoryStorage } from 'multer';
 
 @Controller('users')
 @UseInterceptors(SuccessInterceptor)
@@ -74,16 +76,22 @@ export class UsersController {
     return this.authService.signIn(data);
   }
 
+  //이미지가 없다면 여기서 커트를해야지
   @ApiOperation({ summary: '프로필  이미지 업로드' })
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('image', multerOptions('users')))
+  @Patch('upload')
+  @UseInterceptors(FileInterceptor('image', { storage: memoryStorage() }))
   //users라는 폴더에 이미지 저장
   @UseGuards(JwtAuthGuard)
   //유저정보 가져오기
   uploadUsers(
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile() image: Express.Multer.File | undefined,
     @CurrentUser() user: User,
   ) {
+    if (image === undefined) {
+      throw new BadRequestException(
+        'Image upload failed. No image file provided.',
+      );
+    }
     //로그인한 유저 정보와 이미지를 전달.
     return this.usersService.uploadImage(user, image);
   }

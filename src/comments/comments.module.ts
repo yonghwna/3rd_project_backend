@@ -13,7 +13,6 @@ import { PostsModule } from 'src/posts/posts.module';
     MongooseModule.forFeature([
       { name: Comments.name, schema: CommentsSchema },
     ]),
-    UsersModule,
     forwardRef(() => PostsModule),
   ],
   controllers: [CommentsController],

@@ -7,10 +7,14 @@ import { UserRequestDto } from './dto/users.request.dto';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from './repository/users.repository';
 import { User } from './schemas/user.schema';
+import { AwsService } from 'src/posts/aws.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UsersRepository) {}
+  constructor(
+    private readonly userRepository: UsersRepository,
+    private readonly awsService: AwsService,
+  ) {}
   async getAllUser() {
     const allUser = await this.userRepository.getAllUser();
     const readOnlyData = allUser.map((user) => user.readOnlyData);
@@ -41,13 +45,12 @@ export class UsersService {
   async getUserById(userId: string) {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new HttpException('유저가 존재하지 않습니다', 404);
+      throw new HttpException('user does not exist', 404);
     }
     return user.readOnlyData;
   }
 
   async updateUserById(user: User, body: { nickname: string }) {
-    console.log({ user: user.id, body });
     const { nickname } = body;
     const newUser = await this.userRepository.findByIdAndUpdateNickname(
       user.id,
@@ -57,10 +60,17 @@ export class UsersService {
   }
 
   async uploadImage(user: User, image: Express.Multer.File) {
-    const fileName = `users/${image.filename}`;
+    //이미지가 있을 경우에만 이미지 업로드를 하고,fileName을 업데이트한다.
+    //이미지가 없을 경우에는 fileName을 건들지 않는다.
+    let imageKey = '';
+    if (image != undefined) {
+      const saveImage = await this.awsService.uploadFileToS3('users', image);
+      const fileName = this.awsService.getAwsS3FileUrl(saveImage.key);
+      imageKey = fileName;
+    }
     const newUser = await this.userRepository.findByIdAndUpdateImg(
       user.id,
-      fileName,
+      imageKey,
     );
     return newUser;
   }
@@ -68,7 +78,7 @@ export class UsersService {
   async deleteUserById(user: User) {
     const deletedUser = await this.userRepository.deleteUserById(user.id);
     if (!deletedUser) {
-      throw new HttpException('유저가 존재하지 않습니다', 404);
+      throw new HttpException('user does not exist', 404);
     }
   }
 }

@@ -12,7 +12,9 @@ export class UsersRepository {
   }
   async findByIdAndUpdateImg(id: string, fileName: string) {
     const user = await this.userModel.findById(id);
-    user.profileImage = `http://localhost:8000/media/${fileName}`;
+    if (fileName !== '') {
+      user.profileImage = fileName;
+    }
     const newUser = await user.save();
     return newUser.readOnlyData;
   }
