@@ -74,12 +74,27 @@ export class PostsRepository {
 
   //포스트 삭제하기
   async deletePostById(user: User, postId: string) {
-    //포스트 작성자의 myPosts 배열에서 해당 포스트 삭제
+    //포스트 검색
+    const post = await this.postModel.findById(postId);
+    // 좋아요 누른 사용자 ID로 사용자 검색
+    const likedUsers = await this.usersModel.find({
+      _id: { $in: post.likes.map((like) => like.userId) },
+    });
+    console.log(likedUsers);
+    // 각 사용자의 likedPosts 배열에서 해당 포스트 ID 제거
+    for (const likedUser of likedUsers) {
+      likedUser.likedPosts = likedUser.likedPosts.filter(
+        (likedPost) => likedPost.toString() !== postId,
+      );
+      await likedUser.save();
+    }
+    // 포스트 작성자의 myPosts 배열에서 해당 포스트 삭제
     const author = await this.usersModel.findById(user.id);
     author.myPosts = author.myPosts.filter(
       (myPost) => myPost.toString() !== postId,
     );
     await author.save();
+
     //포스트 삭제
     await this.postModel.findByIdAndDelete(postId);
   }

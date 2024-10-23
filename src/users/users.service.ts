@@ -27,15 +27,6 @@ export class UsersService {
     const isUserEmailExist = await this.userRepository.existsByEmail(email);
     const isUserNickNameExist =
       await this.userRepository.existsByNickname(nickname);
-    // if (isUserEmailExist) {
-    //   throw new UnauthorizedException('email already in use');
-    // }
-    // console.log(isUserNickNameExist);
-    // if (isUserNickNameExist) {
-    //   throw new UnauthorizedException('nickname already taken');
-    // }
-
-    // 중복 검사 결과에 따라 적절한 예외 처리
     if (isUserEmailExist && isUserNickNameExist) {
       throw new BadRequestException({
         nickname: 'nickname already taken',
