@@ -18,10 +18,16 @@ export class UsersService {
   }
 
   async signUp(body: UserRequestDto) {
-    const { email, password } = body;
-    const isUserExist = await this.userRepository.existsByEmail(email);
-    if (isUserExist) {
-      throw new UnauthorizedException('이미 가입된 이메일입니다');
+    const { email, password, nickname } = body;
+    const isUserEmailExist = await this.userRepository.existsByEmail(email);
+    if (isUserEmailExist) {
+      throw new UnauthorizedException('email already in use');
+    }
+    const isUserNickNameExist =
+      await this.userRepository.existsByNickname(nickname);
+    console.log(isUserNickNameExist);
+    if (isUserNickNameExist) {
+      throw new UnauthorizedException('nickname already taken');
     }
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltOrRounds);

@@ -20,6 +20,10 @@ export class UsersRepository {
     const result = await this.userModel.exists({ email });
     return result ? true : false;
   }
+  async existsByNickname(nickname: string): Promise<boolean> {
+    const result = await this.userModel.exists({ nickname });
+    return result ? true : false;
+  }
   async createUser(user: UserRequestDto): Promise<User> {
     const createdUser = new this.userModel(user);
     createdUser.save();
