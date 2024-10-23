@@ -51,6 +51,14 @@ export class PostsController {
     return this.postsService.getPostByCategory(category);
   }
 
+  @ApiOperation({ summary: '특정 카테고리 포스트 가져오기' })
+  @UseGuards(JwtAuthGuard)
+  @Get('title/:title')
+  getPostByTitle(@Param('title') title: string) {
+    console.log(title);
+    return this.postsService.getPostByTitle(title);
+  }
+
   @ApiOperation({ summary: '포스트 생성하기' })
   @Post()
   @UseInterceptors(FileInterceptor('image', { storage: memoryStorage() }))
@@ -83,4 +91,17 @@ export class PostsController {
   deleteUserById(@CurrentUser() user: User, @Param('id') id: string) {
     this.postsService.deletePostById(user, id);
   }
+
+  // 게시글에 좋아요 추가
+  @Post(':postId/like')
+  @UseGuards(JwtAuthGuard)
+  async likePost(@Param('postId') postId: string, @CurrentUser() user: User) {
+    return this.postsService.likePost(postId, user.id);
+  }
+
+  // 게시글에 좋아요 취소
+  // @Delete(':postId/unlike')
+  // async unLikePost(@Param('postId') postId: string, @CurrentUser() user: User) {
+  //   return this.postsService.unLikePost(postId, user.id);
+  // }
 }

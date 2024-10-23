@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-import { Document, SchemaOptions } from 'mongoose';
+import { Document, SchemaOptions, Types } from 'mongoose';
 
 const options: SchemaOptions = {
   collection: 'users',
@@ -47,11 +47,19 @@ export class User extends Document {
   @IsString()
   profileImage: string;
 
+  @Prop({ type: [Types.ObjectId], ref: 'Post', default: [] }) // 사용자 게시글 ID 배열
+  myPosts: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'Post', default: [] }) // 좋아요한 게시글 ID 배열
+  likedPosts: Types.ObjectId[];
+
   readonly readOnlyData: {
     id: string;
     email: string;
     nickname: string;
     profileImage: string;
+    myPosts: Types.ObjectId[];
+    likedPosts: Types.ObjectId[];
   };
 }
 
@@ -63,6 +71,8 @@ UserSchema.virtual('readOnlyData').get(function (this: User) {
     email: this.email,
     nickname: this.nickname,
     profileImage: this.profileImage,
+    myPosts: this.myPosts,
+    likedPosts: this.likedPosts,
   };
 });
 //이건 가상필드인데, db에 저장되지 않는다. 가입을 할 때 createdUser를 리턴하면 비밀번호도 보여버리니까,

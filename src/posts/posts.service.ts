@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PostsRepository } from './repository/posts.repository';
 import { User } from 'src/users/schemas/user.schema';
 import { PostRequestDto } from './dto/post.request.dto';
@@ -23,6 +27,11 @@ export class PostsService {
 
   async getPostByCategory(category: string) {
     const posts = await this.postRepository.getPostByCategory(category);
+    return posts;
+  }
+
+  async getPostByTitle(title: string) {
+    const posts = await this.postRepository.getPostByTitle(title);
     return posts;
   }
 
@@ -55,11 +64,6 @@ export class PostsService {
   ) {
     //만약 이미지가 없거나,내 aws버킷에 있던 이미지라면 이미지 업로드를 하지 않고,fileName도 건들지 않는다.
     //하지만 이미지가 있고, 내 aws버킷에 없는 이미지라면 이미지 업로드를 하고,fileName을 업데이트한다.
-    // function containsNestQuoteURL(input: string): boolean {
-    //   console.log(input);
-    //   const targetURL = 'https://nestquote1.s3.ap-northeast-2.amazonaws.com';
-    //   return !input.includes(targetURL);
-    // }
     let imageKey = '';
 
     if (image != undefined) {
@@ -88,7 +92,21 @@ export class PostsService {
   }
 
   async deletePostById(user: User, postId: string) {
+    const post = await this.postRepository.getPostById(postId);
+    if (!post) {
+      throw new BadRequestException('There is no post');
+    }
+    //포스트 작성자와 현재 유저가 같은지 확인
+    if (post.authorId.toString() !== user.id) {
+      throw new UnauthorizedException(
+        'You do not have permission to delete this post',
+      );
+    }
     await this.postRepository.deletePostById(user, postId);
+  }
+
+  async likePost(postId: string, user: string) {
+    await this.postRepository.likePost(postId, user);
   }
 }
 //유저 이미지도 보여줘야 할텐데...

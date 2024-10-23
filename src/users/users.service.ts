@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   Injectable,
   UnauthorizedException,
@@ -24,15 +25,30 @@ export class UsersService {
   async signUp(body: UserRequestDto) {
     const { email, password, nickname } = body;
     const isUserEmailExist = await this.userRepository.existsByEmail(email);
-    if (isUserEmailExist) {
-      throw new UnauthorizedException('email already in use');
-    }
     const isUserNickNameExist =
       await this.userRepository.existsByNickname(nickname);
-    console.log(isUserNickNameExist);
-    if (isUserNickNameExist) {
-      throw new UnauthorizedException('nickname already taken');
+    // if (isUserEmailExist) {
+    //   throw new UnauthorizedException('email already in use');
+    // }
+    // console.log(isUserNickNameExist);
+    // if (isUserNickNameExist) {
+    //   throw new UnauthorizedException('nickname already taken');
+    // }
+
+    // 중복 검사 결과에 따라 적절한 예외 처리
+    if (isUserEmailExist && isUserNickNameExist) {
+      throw new BadRequestException({
+        nickname: 'nickname already taken',
+        email: 'email already in use',
+        error: 'Bad Request',
+        statusCode: 400,
+      });
+    } else if (isUserEmailExist) {
+      throw new BadRequestException('email already in use');
+    } else if (isUserNickNameExist) {
+      throw new BadRequestException('nickname already taken');
     }
+
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltOrRounds);
     const createdUser = await this.userRepository.createUser({

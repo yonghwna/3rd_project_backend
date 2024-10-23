@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import mongoose, { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,30 +17,47 @@ export class PostsRepository {
   constructor(
     @InjectModel(Post.name) private postModel: Model<Post>,
     @InjectModel(Comments.name) private commentsModel: Model<Comments>,
+    @InjectModel(User.name) private usersModel: Model<User>,
   ) {}
+  //모든 포스트 가져오기
   async getAllPosts() {
-    const CommentsModel = mongoose.model('comments', CommentsSchema);
-    const result = await this.postModel.find();
+    // const CommentsModel = mongoose.model('comments', CommentsSchema);
     // .populate('comments', this.commentsModel);
+    const result = await this.postModel.find();
 
     return result;
   }
 
+  //id로 포스트 가져오기
   async getPostById(postId: string | Types.ObjectId) {
     return await this.postModel.findById(postId);
   }
+
+  //특정 카테고리 포스트 가져오기
+  async getPostByCategory(category: string) {
+    return await this.postModel.find({ category });
+  }
+
+  async getPostByTitle(title: string) {
+    return await this.postModel.find({
+      title: { $regex: title, $options: 'i' },
+    });
+  }
+
+  //포스트 생성하기
   async createPost(post: PostSaveDao): Promise<Post> {
     const createdPost = new this.postModel({
       ...post,
       postImage: post.postImage ? post.postImage : '',
     });
     createdPost.save();
+    await this.usersModel.findByIdAndUpdate(post.authorId, {
+      $push: { myPosts: createdPost._id }, // 새로 생성된 게시글 ID를 사용자 배열에 추가
+    });
     return createdPost;
   }
-  async getPostByCategory(category: string) {
-    return await this.postModel.find({ category });
-  }
 
+  //포스트 수정하기
   async updatePost(
     post: Omit<PostRequestDto, 'category' | 'postImage'>,
     id: string,
@@ -51,35 +72,46 @@ export class PostsRepository {
     return updatedPost;
   }
 
+  //포스트 삭제하기
   async deletePostById(user: User, postId: string) {
-    // const post = await this.postModel.findById(postId);
-    // if (post.authorId.toString() !== user.id) {
-    //   throw new UnauthorizedException('해당 게시글을 삭제할 권한이 없습니다.');
-    // }
+    //포스트 작성자의 myPosts 배열에서 해당 포스트 삭제
+    const author = await this.usersModel.findById(user.id);
+    author.myPosts = author.myPosts.filter(
+      (myPost) => myPost.toString() !== postId,
+    );
+    await author.save();
+    //포스트 삭제
     await this.postModel.findByIdAndDelete(postId);
   }
 
-  //   async findByIdAndUpdateImg(id: string, fileName: string) {
-  //     const user = await this.userModel.findById(id);
-  //     user.profileImage = `http://localhost:8000/media/${fileName}`;
-  //     const newUser = await user.save();
-  //     return newUser.readOnlyData;
-  //   }
-  //   async existsByEmail(email: string): Promise<boolean> {
-  //     const result = await this.userModel.exists({ email });
-  //     return result ? true : false;
-  //   }
-  //   async createUser(user: UserRequestDto): Promise<User> {
-  //     const createdUser = new this.userModel(user);
-  //     createdUser.save();
-  //     return createdUser;
-  //   }
-  //   async findUserByEmail(email: string): Promise<User | null> {
-  //     const user = await this.userModel.findOne({ email });
-  //     return user;
-  //   }
-  //   async findUserByIdWithoutPassword(userId: string): Promise<User | null> {
-  //     const user = await this.userModel.findById(userId).select('-password');
-  //     return user;
-  //   }
+  //게시글에 좋아요 추가
+  async likePost(postId: string, userId: string) {
+    //포스트 정보 가져오기
+    const post = await this.postModel.findById(postId);
+    //좋아요 눌렀는지 확인하기
+    const existUser = post.likes.find(
+      (like) => like.userId.toString() === userId,
+    );
+    const user = await this.usersModel.findById(userId);
+    //눌렀으면 취소하기
+    if (existUser) {
+      post.likes = post.likes.filter(
+        (like) => like.userId.toString() !== userId,
+      );
+      //유저의 좋아요한 게시글 배열에서 해당 게시글 삭제
+      user.likedPosts = user.likedPosts.filter(
+        (likedPost) => likedPost.toString() !== postId,
+      );
+
+      //안눌렀으면 추가하기
+    } else {
+      post.likes.push({ userId: new Types.ObjectId(userId) });
+      //유저의 좋아요한 게시글 배열에 해당 게시글 추가
+      user.likedPosts.push(new Types.ObjectId(postId));
+    }
+    //포스트 저장하기
+    await post.save();
+    await user.save();
+    return post;
+  }
 }

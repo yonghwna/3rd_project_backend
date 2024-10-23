@@ -11,6 +11,7 @@ import { CommentsModule } from 'src/comments/comments.module';
 import { UsersModule } from 'src/users/users.module';
 import { AwsService } from './aws.service';
 import { ConfigModule } from '@nestjs/config';
+import { User, UserSchema } from 'src/users/schemas/user.schema';
 
 @Module({
   imports: [
@@ -20,14 +21,19 @@ import { ConfigModule } from '@nestjs/config';
     }),
     ConfigModule,
     AuthModule,
-    CommentsModule,
+    forwardRef(() => UsersModule),
+    // CommentsModule,
 
-    forwardRef(() => CommentsModule),
+    // forwardRef(() => CommentsModule),
     MongooseModule.forFeature([
       { name: Post.name, schema: PostSchema },
       {
         name: Comments.name,
         schema: CommentsSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
       },
     ]),
   ],
