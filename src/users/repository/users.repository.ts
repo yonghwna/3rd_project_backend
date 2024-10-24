@@ -32,8 +32,14 @@ export class UsersRepository {
     return createdUser;
   }
 
+  //myPosts는 내가 쓴 글을 post의 id와 연결해서 가져오는 것.
+  //bookMarkedPosts는 내 id와 post의 bookMarked와 연결해서 가져오는 것.
   async findById(userId: string): Promise<User | null> {
-    const user = await this.userModel.findById(userId);
+    const user = await this.userModel
+      .findById(userId)
+      .populate(['myPosts', 'bookMarkedPosts'])
+      .exec();
+
     return user;
   }
 

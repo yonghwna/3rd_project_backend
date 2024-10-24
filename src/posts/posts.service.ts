@@ -106,7 +106,7 @@ export class PostsService {
   }
 
   async likePost(postId: string, user: string) {
-    await this.postRepository.likePost(postId, user);
+    return await this.postRepository.likePost(postId, user);
   }
 }
 //유저 이미지도 보여줘야 할텐데...

@@ -78,9 +78,8 @@ export class PostsRepository {
     const post = await this.postModel.findById(postId);
     // 좋아요 누른 사용자 ID로 사용자 검색
     const likedUsers = await this.usersModel.find({
-      _id: { $in: post.likes.map((like) => like.userId) },
+      _id: { $in: post.bookMarked.map((bookMark) => bookMark.userId) },
     });
-    console.log(likedUsers);
     // 각 사용자의 likedPosts 배열에서 해당 포스트 ID 제거
     for (const likedUser of likedUsers) {
       likedUser.bookMarkedPosts = likedUser.bookMarkedPosts.filter(
@@ -104,14 +103,14 @@ export class PostsRepository {
     //포스트 정보 가져오기
     const post = await this.postModel.findById(postId);
     //좋아요 눌렀는지 확인하기
-    const existUser = post.likes.find(
-      (like) => like.userId.toString() === userId,
+    const existUser = post.bookMarked.find(
+      (bookMark) => bookMark.userId.toString() === userId,
     );
     const user = await this.usersModel.findById(userId);
     //눌렀으면 취소하기
     if (existUser) {
-      post.likes = post.likes.filter(
-        (like) => like.userId.toString() !== userId,
+      post.bookMarked = post.bookMarked.filter(
+        (bookMark) => bookMark.userId.toString() !== userId,
       );
       //유저의 좋아요한 게시글 배열에서 해당 게시글 삭제
       user.bookMarkedPosts = user.bookMarkedPosts.filter(
@@ -120,7 +119,7 @@ export class PostsRepository {
 
       //안눌렀으면 추가하기
     } else {
-      post.likes.push({ userId: new Types.ObjectId(userId) });
+      post.bookMarked.push({ userId: new Types.ObjectId(userId) });
       //유저의 좋아요한 게시글 배열에 해당 게시글 추가
       user.bookMarkedPosts.push(new Types.ObjectId(postId));
     }
