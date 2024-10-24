@@ -1,12 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  Matches,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { Document, SchemaOptions, Types } from 'mongoose';
 import { _PostSchema } from 'src/posts/schemas/post.schema';
 
@@ -28,13 +22,6 @@ export class User extends Document {
     default: new Date(),
   })
   createdAt: Date;
-
-  // @ApiProperty({
-  //   example: '2024-09-01T00:00:00.000Z',
-  //   description: '수정일',
-  //   default: new Date(),
-  // })
-  // updatedAt: Date;
 
   @ApiProperty({
     example: 'example@gmail.com',
@@ -84,11 +71,7 @@ export class User extends Document {
   profileImage: string;
 
   @ApiProperty({
-    example: [
-      '6719bd69cf2a692f1ed23e35',
-      '6719bd69cf2a692f1ed23e35',
-      '6719bd69cf2a692f1ed23e35',
-    ],
+    example: ['6719bd69cf2a692f1ed23e35'],
     description: '유저가 작성한 게시글 id 배열',
     required: false,
   })
@@ -96,11 +79,7 @@ export class User extends Document {
   myPosts: Types.ObjectId[];
 
   @ApiProperty({
-    example: [
-      '6719bd69cf2a692f1ed23e35',
-      '6719bd69cf2a692f1ed23e35',
-      '6719bd69cf2a692f1ed23e35',
-    ],
+    example: ['6719bd69cf2a692f1ed23e35'],
     description: '유저가 좋아요를 누른 게시글 id 배열',
     required: false,
   })

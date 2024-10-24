@@ -7,7 +7,6 @@ export class PostSaveDao extends PickType(Post, [
   'title',
   'content',
   'quote',
-  'author',
   'authorId',
   'postImage',
 ] as const) {}

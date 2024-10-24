@@ -19,7 +19,10 @@ import { PostRequestDto } from './dto/post.request.dto';
 import { SuccessInterceptor } from 'src/common/interceptors/success.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { PostResponseDto } from './dto/post.response.dto';
+import {
+  PostPreviewResponseDto,
+  PostResponseDto,
+} from './dto/post.response.dto';
 
 @Controller('posts')
 @UseInterceptors(SuccessInterceptor) //이건 글로벌로 설정할 수 없나?
@@ -27,13 +30,17 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @ApiOperation({ summary: '모든 포스트 가져오기' })
-  @ApiResponse({ status: 200, description: '성공', type: [PostResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    type: [PostPreviewResponseDto],
+  })
   @Get('all')
-  getAllPosts(): Promise<PostResponseDto[]> {
+  getAllPosts(): Promise<PostPreviewResponseDto[]> {
     return this.postsService.getAllPosts();
   }
 
-  @ApiOperation({ summary: 'id로 포스트 가져오기' })
+  @ApiOperation({ summary: 'id로 포스트 가져오기' }) //이것만 모든 post가져오기
   @ApiBearerAuth('bearer')
   @ApiResponse({ status: 200, description: '성공', type: PostResponseDto })
   @UseGuards(JwtAuthGuard)
@@ -43,20 +50,30 @@ export class PostsController {
   }
 
   @ApiOperation({ summary: '특정 카테고리 포스트 가져오기' })
-  @ApiResponse({ status: 200, description: '성공', type: [PostResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    type: [PostPreviewResponseDto],
+  })
   @Get('quote/:category')
   getPostByCategory(
     @Param('category') category: string,
-  ): Promise<PostResponseDto[]> {
+  ): Promise<PostPreviewResponseDto[]> {
     return this.postsService.getPostByCategory(category);
   }
 
   @ApiOperation({ summary: '포스트 검색 - 제목' })
   @ApiBearerAuth('bearer')
-  @ApiResponse({ status: 200, description: '성공', type: [PostResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    type: [PostPreviewResponseDto],
+  })
   @UseGuards(JwtAuthGuard)
   @Get('title/:title')
-  getPostByTitle(@Param('title') title: string): Promise<PostResponseDto[]> {
+  getPostByTitle(
+    @Param('title') title: string,
+  ): Promise<PostPreviewResponseDto[]> {
     return this.postsService.getPostByTitle(title);
   }
 
@@ -85,8 +102,7 @@ export class PostsController {
     @Body() data: PostRequestDto,
     @CurrentUser() user: User,
     @UploadedFile() image: Express.Multer.File | undefined,
-  ): Promise<PostResponseDto> {
-    console.log({ id, data, user, image });
+  ) {
     return this.postsService.updatePost(id, data, user, image);
   }
 

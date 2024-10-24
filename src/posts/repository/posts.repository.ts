@@ -1,16 +1,13 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import mongoose, { Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from '../schemas/post.schema';
 import { PostSaveDao } from '../dto/post.save.dao';
-import { Comments, CommentsSchema } from 'src/comments/schemas/comments.schema';
+import { Comments } from 'src/comments/schemas/comments.schema';
 import { User } from 'src/users/schemas/user.schema';
 import { PostRequestDto } from '../dto/post.request.dto';
+import { PostPreviewResponseDto } from '../dto/post.response.dto';
 
 @Injectable()
 export class PostsRepository {
@@ -20,28 +17,73 @@ export class PostsRepository {
     @InjectModel(User.name) private usersModel: Model<User>,
   ) {}
   //모든 포스트 가져오기
-  async getAllPosts() {
-    // const CommentsModel = mongoose.model('comments', CommentsSchema);
-    // .populate('comments', this.commentsModel);
-    const result = await this.postModel.find();
-
+  async getAllPosts(): Promise<PostPreviewResponseDto[]> {
+    const result = await this.postModel
+      .find(
+        {},
+        {
+          id: 1,
+          category: 1,
+          title: 1,
+          quote: 1,
+          authorId: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          bookMarked: 1,
+        },
+      )
+      .populate('authorId', 'nickname')
+      .exec();
     return result;
   }
 
   //id로 포스트 가져오기
   async getPostById(postId: string | Types.ObjectId) {
-    return await this.postModel.findById(postId);
+    return await this.postModel
+      .findById(postId)
+      .populate('authorId', 'nickname profileImage')
+      .exec();
   }
 
   //특정 카테고리 포스트 가져오기
-  async getPostByCategory(category: string) {
-    return await this.postModel.find({ category });
+  async getPostByCategory(category: string): Promise<PostPreviewResponseDto[]> {
+    return await this.postModel
+      .find(
+        { category },
+        {
+          id: 1,
+          category: 1,
+          title: 1,
+          quote: 1,
+          authorId: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          bookMarked: 1,
+        },
+      )
+      .populate('authorId', 'nickname')
+      .exec();
   }
 
   async getPostByTitle(title: string) {
-    return await this.postModel.find({
-      title: { $regex: title, $options: 'i' },
-    });
+    return await this.postModel
+      .find(
+        {
+          title: { $regex: title, $options: 'i' },
+        },
+        {
+          id: 1,
+          category: 1,
+          title: 1,
+          quote: 1,
+          authorId: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          bookMarked: 1,
+        },
+      )
+      .populate('authorId', 'nickname')
+      .exec();
   }
 
   //포스트 생성하기

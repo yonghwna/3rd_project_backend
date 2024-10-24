@@ -49,7 +49,6 @@ export class PostsService {
     const newPost = {
       ...data,
       postImage: imageKey,
-      author: user.nickname,
       authorId: user.id,
     };
     const post = await this.postRepository.createPost(newPost);
