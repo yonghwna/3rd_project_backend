@@ -1,6 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
 import { Document, SchemaOptions, Types } from 'mongoose';
 
 const options: SchemaOptions = {
@@ -31,12 +37,16 @@ export class User extends Document {
 
   @ApiProperty({
     example: 'ExamplePassword1',
-    description: 'password',
+    description: '대문자나 소문자, 숫자, 특수문자를 포함한 8자 이상의 비밀번호',
     required: true,
   })
   @Prop({ required: true })
   @IsString()
   @IsNotEmpty()
+  // @MinLength(8)
+  // @Matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
+  //   message: 'Password too weak',
+  // })
   password: string;
 
   @Prop({
@@ -51,7 +61,7 @@ export class User extends Document {
   myPosts: Types.ObjectId[];
 
   @Prop({ type: [Types.ObjectId], ref: 'Post', default: [] }) // 좋아요한 게시글 ID 배열
-  likedPosts: Types.ObjectId[];
+  bookMarkedPosts: Types.ObjectId[];
 
   readonly readOnlyData: {
     id: string;
@@ -59,7 +69,7 @@ export class User extends Document {
     nickname: string;
     profileImage: string;
     myPosts: Types.ObjectId[];
-    likedPosts: Types.ObjectId[];
+    bookMarkedPosts: Types.ObjectId[];
   };
 }
 
@@ -72,7 +82,7 @@ UserSchema.virtual('readOnlyData').get(function (this: User) {
     nickname: this.nickname,
     profileImage: this.profileImage,
     myPosts: this.myPosts,
-    likedPosts: this.likedPosts,
+    bookMarkedPosts: this.bookMarkedPosts,
   };
 });
 //이건 가상필드인데, db에 저장되지 않는다. 가입을 할 때 createdUser를 리턴하면 비밀번호도 보여버리니까,

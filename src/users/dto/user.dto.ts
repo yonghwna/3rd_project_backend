@@ -3,15 +3,10 @@ import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { User } from '../schemas/user.schema';
 
 export class ReadOnlyUserDto extends PickType(User, [
+  'id',
   'email',
   'nickname',
-] as const) {
-  @ApiProperty({
-    example: '671147b18983a22fd49b03fe',
-    description: 'id',
-    required: true,
-  })
-  @IsEmail()
-  @IsNotEmpty()
-  id: string;
-}
+  'profileImage',
+  'myPosts',
+  'bookMarkedPosts',
+] as const) {}

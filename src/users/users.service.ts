@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  HttpException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { UserRequestDto } from './dto/users.request.dto';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from './repository/users.repository';

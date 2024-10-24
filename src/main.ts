@@ -2,7 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import {
+  DocumentBuilder,
+  SwaggerCustomOptions,
+  SwaggerModule,
+} from '@nestjs/swagger';
 import * as expressBasicAuth from 'express-basic-auth';
 import * as path from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -35,10 +39,26 @@ async function bootstrap() {
     .setDescription('3rd_project_api')
     .setVersion('1.0.0')
     .addTag('cats')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Input your JWT token',
+        name: 'Authorization',
+        in: 'header',
+      },
+      'bearer',
+    )
     .build();
   //SwaggerModule.setup()을 사용해서 /docs 경로에 API 문서를 노출.
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, documentFactory);
+  const customOptions: SwaggerCustomOptions = {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  };
+  SwaggerModule.setup('docs', app, documentFactory, customOptions);
   //CORS 설정
   app.enableCors({ origin: true, credentials: true });
 

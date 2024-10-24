@@ -6,3 +6,7 @@ export class UserRequestDto extends PickType(User, [
   'nickname',
   'password',
 ] as const) {}
+
+export class UserChangeNicknameDto extends PickType(User, [
+  'nickname',
+] as const) {}

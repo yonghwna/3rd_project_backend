@@ -83,8 +83,8 @@ export class PostsRepository {
     console.log(likedUsers);
     // 각 사용자의 likedPosts 배열에서 해당 포스트 ID 제거
     for (const likedUser of likedUsers) {
-      likedUser.likedPosts = likedUser.likedPosts.filter(
-        (likedPost) => likedPost.toString() !== postId,
+      likedUser.bookMarkedPosts = likedUser.bookMarkedPosts.filter(
+        (bookMarkedPost) => bookMarkedPost.toString() !== postId,
       );
       await likedUser.save();
     }
@@ -114,15 +114,15 @@ export class PostsRepository {
         (like) => like.userId.toString() !== userId,
       );
       //유저의 좋아요한 게시글 배열에서 해당 게시글 삭제
-      user.likedPosts = user.likedPosts.filter(
-        (likedPost) => likedPost.toString() !== postId,
+      user.bookMarkedPosts = user.bookMarkedPosts.filter(
+        (bookMarkedPost) => bookMarkedPost.toString() !== postId,
       );
 
       //안눌렀으면 추가하기
     } else {
       post.likes.push({ userId: new Types.ObjectId(userId) });
       //유저의 좋아요한 게시글 배열에 해당 게시글 추가
-      user.likedPosts.push(new Types.ObjectId(postId));
+      user.bookMarkedPosts.push(new Types.ObjectId(postId));
     }
     //포스트 저장하기
     await post.save();

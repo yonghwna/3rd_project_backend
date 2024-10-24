@@ -3,6 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Payload } from './jwt.payload';
 import { UsersRepository } from 'src/users/repository/users.repository';
+import { User } from 'src/users/schemas/user.schema';
+import { Error } from 'mongoose';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -15,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
     });
   }
-  async validate(payload: Payload) {
+  async validate(payload: Payload): Promise<User | Error> {
     const user = await this.userRepository.findUserByIdWithoutPassword(
       payload.sub,
     );

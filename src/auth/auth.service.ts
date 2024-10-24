@@ -16,7 +16,7 @@ export class AuthService {
     const { email, password } = data;
     const user = await this.userRepository.findUserByEmail(email);
     if (!user) {
-      throw new UnauthorizedException('이메일 또는 비밀번호를 확인해주세요.');
+      throw new UnauthorizedException('This email is not registered');
     }
     //여긴 salt 없는데 어케 비교하는거지?
     const isPasswordValid: boolean = await bcrypt.compare(
@@ -24,13 +24,13 @@ export class AuthService {
       user.password,
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('이메일 또는 비밀번호를 확인해주세요.');
+      throw new UnauthorizedException('You entered your password incorrectly');
     }
     //jwt를 반환해주는 부분.
     //nest/jwt가 제공하는 기능을 사용해야 하므로 Module에서  JwtModule 주입받아 사용.
     const payload = { email: user.email, sub: user.id };
     return {
-      access_token: this.jwtService.sign(payload),
+      bearerToken: this.jwtService.sign(payload),
     };
   }
 }
