@@ -34,7 +34,7 @@ export class Post extends Document {
     description: 'category',
     required: true,
   })
-  @Prop({ required: true, default: '전체' })
+  @Prop({ required: true, default: '도서' })
   @IsString()
   @IsNotEmpty()
   category: string;
@@ -69,16 +69,6 @@ export class Post extends Document {
   @IsNotEmpty()
   quote: string;
 
-  // @ApiProperty({
-  //   example: 'exampleName1',
-  //   description: '작성자 닉네임',
-  //   required: true,
-  // })
-  // @Prop({ required: true })
-  // @IsString()
-  // @IsNotEmpty()
-  // author: string;
-
   @ApiProperty({
     example: 'asdfq23saf21asdfa4',
     description: '작성자 id',
@@ -88,16 +78,6 @@ export class Post extends Document {
   @IsString()
   @IsNotEmpty()
   authorId: string;
-
-  // @ApiProperty({
-  //   example: 'example.jpg',
-  //   description: '작성자 프로필 이미',
-  //   required: true,
-  // })
-  // @Prop({ required: true })
-  // @IsString()
-  // @IsNotEmpty()
-  // authorProfileImage: string;
 
   @ApiProperty({
     example: 'image.jpg',
@@ -109,11 +89,7 @@ export class Post extends Document {
   postImage: string;
 
   @ApiProperty({
-    example: [
-      '6719bd69cf2a692f1ed23e35',
-      '6719bd69cf2a692f1ed23e35',
-      '6719bd69cf2a692f1ed23e35',
-    ],
+    example: ['6719bd69cf2a692f1ed23e35', '6719bd69cf2a692f1ed23e35'],
     description: '좋아요 누른 유저 id',
     required: false,
   })

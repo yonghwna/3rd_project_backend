@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -29,32 +30,49 @@ import {
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
-  @ApiOperation({ summary: '모든 포스트 가져오기' })
   @ApiResponse({
     status: 200,
     description: '성공',
     type: [PostPreviewResponseDto],
   })
+  @ApiOperation({ summary: '모든 포스트 가져오기' })
   @Get('all')
   getAllPosts(): Promise<PostPreviewResponseDto[]> {
     return this.postsService.getAllPosts();
   }
 
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    type: [PostPreviewResponseDto],
+  })
+  @ApiOperation({ summary: '포스트 검색 ' })
+  @Get('search')
+  searchPosts(
+    @Query('title') title: string,
+    @Query('category') category?: string,
+  ): Promise<PostPreviewResponseDto[]> | [] {
+    if (!title) {
+      return []; // 빈 배열 반환
+    }
+    return this.postsService.searchPosts(title, category);
+  }
+
+  @ApiResponse({ status: 200, description: '성공', type: PostResponseDto })
   @ApiOperation({ summary: 'id로 포스트 가져오기' }) //이것만 모든 post가져오기
   @ApiBearerAuth('bearer')
-  @ApiResponse({ status: 200, description: '성공', type: PostResponseDto })
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   getPostById(@Param('id') id: string): Promise<PostResponseDto> {
     return this.postsService.getPostById(id);
   }
 
-  @ApiOperation({ summary: '특정 카테고리 포스트 가져오기' })
   @ApiResponse({
     status: 200,
     description: '성공',
     type: [PostPreviewResponseDto],
   })
+  @ApiOperation({ summary: '특정 카테고리 포스트 가져오기' })
   @Get('quote/:category')
   getPostByCategory(
     @Param('category') category: string,
@@ -62,24 +80,9 @@ export class PostsController {
     return this.postsService.getPostByCategory(category);
   }
 
-  @ApiOperation({ summary: '포스트 검색 - 제목' })
-  @ApiBearerAuth('bearer')
-  @ApiResponse({
-    status: 200,
-    description: '성공',
-    type: [PostPreviewResponseDto],
-  })
-  @UseGuards(JwtAuthGuard)
-  @Get('title/:title')
-  getPostByTitle(
-    @Param('title') title: string,
-  ): Promise<PostPreviewResponseDto[]> {
-    return this.postsService.getPostByTitle(title);
-  }
-
+  @ApiResponse({ status: 201, description: '성공', type: PostResponseDto })
   @ApiOperation({ summary: '포스트 생성하기' })
   @ApiBearerAuth('bearer')
-  @ApiResponse({ status: 201, description: '성공', type: PostResponseDto })
   @UseInterceptors(FileInterceptor('image', { storage: memoryStorage() }))
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -91,8 +94,8 @@ export class PostsController {
     return this.postsService.createPost(data, user, image);
   }
 
-  @ApiOperation({ summary: '포스트 수정하기' })
   @ApiResponse({ status: 201, description: '성공', type: PostResponseDto })
+  @ApiOperation({ summary: '포스트 수정하기' })
   @ApiBearerAuth('bearer')
   @Patch(':id')
   @UseInterceptors(FileInterceptor('image', { storage: memoryStorage() }))
@@ -106,6 +109,7 @@ export class PostsController {
     return this.postsService.updatePost(id, data, user, image);
   }
 
+  @ApiResponse({ status: 204, description: '성공' })
   @ApiOperation({ summary: 'id로 게시글 삭제' })
   @ApiBearerAuth('bearer')
   @UseGuards(JwtAuthGuard)
@@ -115,8 +119,8 @@ export class PostsController {
   }
 
   // 게시글에 좋아요 추가
-  @ApiOperation({ summary: '게시글 좋아요' })
   @ApiResponse({ status: 201, description: '성공', type: PostResponseDto })
+  @ApiOperation({ summary: '게시글 좋아요' })
   @ApiBearerAuth('bearer')
   @Post(':postId/like')
   @UseGuards(JwtAuthGuard)
@@ -126,10 +130,4 @@ export class PostsController {
   ): Promise<PostResponseDto> {
     return this.postsService.likePost(postId, user.id);
   }
-
-  // 게시글에 좋아요 취소
-  // @Delete(':postId/unlike')
-  // async unLikePost(@Param('postId') postId: string, @CurrentUser() user: User) {
-  //   return this.postsService.unLikePost(postId, user.id);
-  // }
 }

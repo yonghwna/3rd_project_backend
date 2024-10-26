@@ -30,8 +30,8 @@ export class PostsService {
     return posts;
   }
 
-  async getPostByTitle(title: string) {
-    const posts = await this.postRepository.getPostByTitle(title);
+  async searchPosts(title: string, category: string) {
+    const posts = await this.postRepository.searchPosts(title, category);
     return posts;
   }
 

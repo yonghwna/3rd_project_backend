@@ -65,23 +65,27 @@ export class PostsRepository {
       .exec();
   }
 
-  async getPostByTitle(title: string) {
+  async searchPosts(title: string, category: string) {
+    const query: any = {
+      title: { $regex: title, $options: 'i' }, // 대소문자 구분 없이 제목 검색
+    };
+
+    // category가 제공되었을 때만 추가
+    if (category != '') {
+      query.category = category; // 정확한 카테고리 일치
+    }
+
     return await this.postModel
-      .find(
-        {
-          title: { $regex: title, $options: 'i' },
-        },
-        {
-          id: 1,
-          category: 1,
-          title: 1,
-          quote: 1,
-          authorId: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          bookMarked: 1,
-        },
-      )
+      .find(query, {
+        id: 1,
+        category: 1,
+        title: 1,
+        quote: 1,
+        authorId: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        bookMarked: 1,
+      })
       .populate('authorId', 'nickname')
       .exec();
   }

@@ -16,7 +16,7 @@ import { UsersService } from './users.service';
 import { SuccessInterceptor } from 'src/common/interceptors/success.interceptor';
 import { UserChangeNicknameDto, UserRequestDto } from './dto/users.request.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ReadOnlyUserDto } from './dto/user.dto';
+import { ReadOnlyUserDto } from './dto/user.readOnly.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginRequestDto } from 'src/auth/dto/login.request.dto';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
@@ -34,27 +34,27 @@ export class UsersController {
     private readonly authService: AuthService,
   ) {}
 
+  @ApiResponse({ status: 200, description: '성공', type: ReadOnlyUserDto })
   @ApiOperation({ summary: '현재 로그인한 유저 정보' })
   @ApiBearerAuth('bearer')
-  @ApiResponse({ status: 200, description: '성공', type: ReadOnlyUserDto })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getCurrentUser(@CurrentUser() user: User): ReadOnlyUserDto {
     return user.readOnlyData;
   }
 
+  @ApiResponse({ status: 200, description: '성공', type: ReadOnlyUserDto })
   @ApiOperation({ summary: 'id로 유저정보 가져오기' })
   @ApiBearerAuth('bearer')
-  @ApiResponse({ status: 200, description: '성공', type: ReadOnlyUserDto })
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getUserById(@Param('id') id: string): Promise<ReadOnlyUserDto> {
     return await this.usersService.getUserById(id);
   }
 
+  @ApiResponse({ status: 201, description: '성공', type: ReadOnlyUserDto })
   @ApiOperation({ summary: '유저 닉네임 변경' })
   @ApiBearerAuth('bearer')
-  @ApiResponse({ status: 201, description: '성공', type: ReadOnlyUserDto })
   @UseGuards(JwtAuthGuard)
   @Patch()
   async updateUserById(
@@ -64,32 +64,32 @@ export class UsersController {
     return await this.usersService.updateUserById(user, body);
   }
 
-  @ApiOperation({ summary: '회원가입' })
   @ApiResponse({
     status: 201,
     description: '성공',
     type: ReadOnlyUserDto,
   })
+  @ApiOperation({ summary: '회원가입' })
   @Post('signup')
   async signUp(@Body() body: UserRequestDto): Promise<ReadOnlyUserDto> {
     return await this.usersService.signUp(body);
   }
 
-  @ApiOperation({ summary: '로그인' })
   @ApiResponse({
     status: 200,
     description: '성공',
     type: UserLoginResponseDto,
   })
+  @ApiOperation({ summary: '로그인' })
   @Post('signin')
   logIn(@Body() data: LoginRequestDto): Promise<UserLoginResponseDto> {
     return this.authService.signIn(data);
   }
 
   //이미지가 없다면 여기서 커트를해야지
+  @ApiResponse({ status: 201, description: '성공', type: ReadOnlyUserDto })
   @ApiOperation({ summary: '프로필  이미지 업로드' })
   @ApiBearerAuth('bearer')
-  @ApiResponse({ status: 201, description: '성공', type: ReadOnlyUserDto })
   @Patch('upload')
   @UseInterceptors(FileInterceptor('image', { storage: memoryStorage() }))
   //users라는 폴더에 이미지 저장
@@ -108,9 +108,9 @@ export class UsersController {
     return this.usersService.uploadImage(user, image);
   }
 
+  @ApiResponse({ status: 204, description: '성공' })
   @ApiOperation({ summary: '로그인한 유저 계정 삭제' })
   @ApiBearerAuth('bearer')
-  @ApiResponse({ status: 204, description: '성공' })
   @UseGuards(JwtAuthGuard)
   @Delete()
   deleteUserById(@CurrentUser() user: User) {
